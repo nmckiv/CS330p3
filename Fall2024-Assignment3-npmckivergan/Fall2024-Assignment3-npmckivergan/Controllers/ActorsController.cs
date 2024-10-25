@@ -19,6 +19,18 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             _context = context;
         }
 
+        public async Task<IActionResult> GetActorPhoto(int id)
+        {
+            var actor = await _context.Actor.FirstOrDefaultAsync(m => m.Id == id);
+            if (actor == null)
+            {
+                return NotFound();
+            }
+            var imageData = actor.Photo;
+
+            return File(imageData, "image/jpg");
+        }
+
         // GET: Actors
         public async Task<IActionResult> Index()
         {
@@ -54,10 +66,16 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Gender,Age,IMDB_link,Photo")] Actor actor)
+        public async Task<IActionResult> Create([Bind("Id,Name,Gender,Age,IMDB_link,Photo")] Actor actor, IFormFile? Photo)
         {
             if (ModelState.IsValid)
             {
+                if (Photo != null && Photo.Length > 0)
+                {
+                    using var memoryStream = new MemoryStream(); // Dispose() for garbage collection 
+                    await Photo.CopyToAsync(memoryStream);
+                    actor.Photo = memoryStream.ToArray();
+                }
                 _context.Add(actor);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -86,7 +104,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Gender,Age,IMDB_link,Photo")] Actor actor)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Gender,Age,IMDB_link,Photo")] Actor actor, IFormFile? Photo)
         {
             if (id != actor.Id)
             {
@@ -97,6 +115,12 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             {
                 try
                 {
+                    if (Photo != null && Photo.Length > 0)
+                    {
+                        using var memoryStream = new MemoryStream(); // Dispose() for garbage collection 
+                        await Photo.CopyToAsync(memoryStream);
+                        actor.Photo = memoryStream.ToArray();
+                    }
                     _context.Update(actor);
                     await _context.SaveChangesAsync();
                 }
