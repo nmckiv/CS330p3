@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Fall2024_Assignment3_npmckivergan.Data;
 using Fall2024_Assignment3_npmckivergan.Models;
+using System.Numerics;
 
 namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
@@ -54,10 +55,16 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Genre,Year,IMDB_link,Media")] Movie movie)
+        public async Task<IActionResult> Create([Bind("Id,Title,Genre,Year,IMDB_link,Media")] Movie movie, IFormFile? Media)
         {
             if (ModelState.IsValid)
             {
+                if (Media != null && Media.Length > 0)
+                {
+                    using var memoryStream = new MemoryStream(); // Dispose() for garbage collection 
+                    await Media.CopyToAsync(memoryStream);
+                    movie.Media = memoryStream.ToArray();
+                }
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -86,7 +93,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Genre,Year,IMDB_link,Media")] Movie movie)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Genre,Year,IMDB_link,Media")] Movie movie, IFormFile? Media)
         {
             if (id != movie.Id)
             {
@@ -97,6 +104,12 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             {
                 try
                 {
+                    if (Media != null && Media.Length > 0)
+                    {
+                        using var memoryStream = new MemoryStream(); // Dispose() for garbage collection 
+                        await Media.CopyToAsync(memoryStream);
+                        movie.Media = memoryStream.ToArray();
+                    }
                     _context.Update(movie);
                     await _context.SaveChangesAsync();
                 }

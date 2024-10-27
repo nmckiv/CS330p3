@@ -33,9 +33,10 @@
                 <input asp-for="IMDB_link" class="form-control" />
                 <span asp-validation-for="IMDB_link" class="text-danger"></span>
             </div>
-            <div>
-                <label for="Media">Upload Media</label>
-                <input asp-for="Media" type="file" class="form-control" />
+            <div class="form-group">
+                <label asp-for="Media" class="control-label"></label>
+                <input type="file" id="Media" name="Media" class="form-control" />
+                <span asp-validation-for="Media" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
