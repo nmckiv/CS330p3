@@ -12,6 +12,7 @@ namespace Fall2024_Assignment3_npmckivergan.Data
         }
         public DbSet<Fall2024_Assignment3_npmckivergan.Models.Actor> Actor { get; set; } = default!;
         public DbSet<Fall2024_Assignment3_npmckivergan.Models.Movie> Movie { get; set; } = default!;
+        public DbSet<Fall2024_Assignment3_npmckivergan.Models.Review> Review { get; set; } = default!;
         public DbSet<Fall2024_Assignment3_npmckivergan.Models.ActorMovie> ActorMovie { get; set; } = default!;
     }
 }
