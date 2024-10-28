@@ -17,10 +17,12 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         private readonly ILogger<MoviesController> _logger;
 
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _config;
 
-        public MoviesController(ApplicationDbContext context, ILogger<MoviesController> logger)
+        public MoviesController(ApplicationDbContext context, IConfiguration config, ILogger<MoviesController> logger)
         {
             _context = context;
+            _config = config;
             _logger = logger;
         }
 
@@ -175,6 +177,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         [HttpPost]
         public async Task<IActionResult> GenerateReview(int movieId)
         {
+            var reviewerKey = _config["OpenAI:ReviewerKey"];
             // Generate a hardcoded dummy review
             var review = new Review
             {
