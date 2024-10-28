@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Fall2024_Assignment3_npmckivergan.Data.Migrations
+namespace Fall2024_Assignment3_npmckivergan.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241027013742_AddReviewModel")]
-    partial class AddReviewModel
+    [Migration("20241028172026_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,6 +98,9 @@ namespace Fall2024_Assignment3_npmckivergan.Data.Migrations
                     b.Property<byte[]>("Media")
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<float>("OverallSentiment")
+                        .HasColumnType("real");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -125,13 +128,16 @@ namespace Fall2024_Assignment3_npmckivergan.Data.Migrations
                     b.Property<int>("MovieId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Rating")
-                        .HasColumnType("int");
+                    b.Property<float>("Rating")
+                        .HasColumnType("real");
 
                     b.Property<string>("ReviewerName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MovieId");
 
                     b.ToTable("Review");
                 });
@@ -357,6 +363,17 @@ namespace Fall2024_Assignment3_npmckivergan.Data.Migrations
                     b.Navigation("Movie");
                 });
 
+            modelBuilder.Entity("Fall2024_Assignment3_npmckivergan.Models.Review", b =>
+                {
+                    b.HasOne("Fall2024_Assignment3_npmckivergan.Models.Movie", "Movie")
+                        .WithMany("Reviews")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Movie");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -406,6 +423,11 @@ namespace Fall2024_Assignment3_npmckivergan.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fall2024_Assignment3_npmckivergan.Models.Movie", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

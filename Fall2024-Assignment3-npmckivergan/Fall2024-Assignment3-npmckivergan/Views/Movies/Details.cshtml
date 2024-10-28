@@ -48,6 +48,77 @@
     </dl>
 </div>
 <div>
+    <button class="btn btn-success generate-review-btn" type="button" data-movie-id="@Model.Id">Generate New Review</button>
+</div>
+<!-- AI Generated Reviews and Sentiment Analysis -->
+<div>
+    <h4>Sentiment Analysis of AI-Generated Reviews</h4>
+    <hr />
+    <h5>Overall Sentiment: @Model.OverallSentiment</h5>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Review Text</th>
+                <th scope="col">Score (%)</th>
+                <th scope="col">Reviewer Name</th>
+            </tr>
+        </thead>
+        <tbody id="reviewsTableBody">
+            @{
+                @if (Model.Reviews.Count() > 0) // Check if there are reviews
+                {
+
+                    foreach (var review in Model.Reviews)
+
+                    {
+                        <tr>
+                            <td>@review.Content</td>
+                            <td>@(review.Rating)</td> <!-- Ensure Rating is displayed correctly -->
+                            <td>@review.ReviewerName</td>
+                            <td>
+                                <form asp-action="DeleteReview" asp-route-movieId="@Model.Id" asp-route-reviewId="@review.Id" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger" >Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4">No reviews available.</td> <!-- Updated colspan to 4 to account for Delete column -->
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+@section Scripts {
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $(".generate-review-btn").click(function(e) {
+                    e.preventDefault(); // Prevent the default form submission
+
+                    // Get the movie ID from a hidden input
+                    var movieId = $(this).data("movie-id");
+
+                    $.ajax({
+                        url: '/Movies/GenerateReview', // URL to the GenerateReview action
+                        type: 'POST',
+                        data: { movieId: movieId }, // Send the movie ID
+                        success: function(result) {
+                            // Optionally update the reviews table with the new review
+                            location.reload(); // Reload the page to reflect the new review
+                        },
+                        error: function(xhr, status, error) {
+                            alert("An error occurred: " + xhr.responseText);
+                        }
+                    });
+                });
+            });
+        </script>
+}

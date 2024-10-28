@@ -8,5 +8,7 @@
         public int Year { get; set; }
         public string IMDB_link { get; set; }
         public byte[]? Media { get; set; }
+        public float OverallSentiment { get; set; }
+        public List<Review> Reviews { get; set; } = new List<Review>();
     }
 }

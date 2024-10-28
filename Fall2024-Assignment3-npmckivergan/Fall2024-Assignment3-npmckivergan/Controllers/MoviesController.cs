@@ -13,11 +13,15 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
     public class MoviesController : Controller
     {
+
+        private readonly ILogger<MoviesController> _logger;
+
         private readonly ApplicationDbContext _context;
 
-        public MoviesController(ApplicationDbContext context)
+        public MoviesController(ApplicationDbContext context, ILogger<MoviesController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Movies
@@ -35,6 +39,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             }
 
             var movie = await _context.Movie
+                .Include(m => m.Reviews)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (movie == null)
             {
@@ -165,6 +170,61 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         private bool MovieExists(int id)
         {
             return _context.Movie.Any(e => e.Id == id);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GenerateReview(int movieId)
+        {
+            // Generate a hardcoded dummy review
+            var review = new Review
+            {
+                MovieId = movieId,
+                Content = "This movie was fantastic! A must-watch for everyone.",
+                Rating = new Random().Next(0, 101),
+                ReviewerName = "John Doe"
+            };
+
+            // Retrieve the movie and add the review
+            var movie = await _context.Movie.Include(m => m.Reviews).FirstOrDefaultAsync(m => m.Id == movieId);
+            if (movie == null) return NotFound();
+
+            movie.Reviews.Add(review); // Add the review to the movie's reviews
+
+            // Now save changes to the database
+            await _context.SaveChangesAsync();
+
+            var updatedMovie = await _context.Movie.Include(m => m.Reviews).FirstOrDefaultAsync(m => m.Id == movieId);
+            _logger.LogInformation($"Number of Reviews After Save: {updatedMovie.Reviews.Count}");
+            foreach (var rev in updatedMovie.Reviews)
+            {
+                _logger.LogInformation($"Review Content: {rev.Content}");
+            }
+
+            return RedirectToAction("Details", new { id = movieId });
+        }
+        public async Task<IActionResult> DeleteReview(int movieId, int reviewId)
+        {
+            // Retrieve the movie including its reviews
+            var movie = await _context.Movie
+                .Include(m => m.Reviews)
+                .FirstOrDefaultAsync(m => m.Id == movieId);
+
+            if (movie == null)
+                return NotFound();
+
+            // Find the review to delete
+            var review = movie.Reviews.FirstOrDefault(r => r.Id == reviewId);
+            if (review == null)
+                return NotFound();
+
+            // Remove the review from the collection
+            movie.Reviews.Remove(review);
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            // Redirect to the movie details page
+            return RedirectToAction("Details", new { id = movieId });
         }
     }
 }
