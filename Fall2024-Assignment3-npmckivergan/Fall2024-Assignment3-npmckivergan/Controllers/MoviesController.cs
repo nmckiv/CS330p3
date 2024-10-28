@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Fall2024_Assignment3_npmckivergan.Data;
 using Fall2024_Assignment3_npmckivergan.Models;
 using System.Numerics;
+using OpenAI.Chat;
+using Azure.AI.OpenAI;
+using Azure.Identity;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
@@ -18,12 +22,19 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
+        private readonly ChatClient _client;
 
         public MoviesController(ApplicationDbContext context, IConfiguration config, ILogger<MoviesController> logger)
         {
             _context = context;
             _config = config;
             _logger = logger;
+
+            var apiKey = "5c906e8218294152b82454d70be2277a";
+            var apiEndpoint = "https://fall2024-assignment1-npmckivergan-openai.openai.azure.com/";
+            AzureOpenAIClient chat = new(new Uri(apiEndpoint), new System.ClientModel.ApiKeyCredential(apiKey));
+
+            _client = chat.GetChatClient("gpt-35-turbo");
         }
 
         // GET: Movies
@@ -177,18 +188,23 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         [HttpPost]
         public async Task<IActionResult> GenerateReview(int movieId)
         {
-            var reviewerKey = _config["OpenAI:ReviewerKey"];
+
+            var movie = await _context.Movie.Include(m => m.Reviews).FirstOrDefaultAsync(m => m.Id == movieId);
+
+            string prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, titties, ass, drugs, violence, explosions, and sports.  You think romance is gay.\\n\\nInstructions: Review the given movie from this point of view.  Sound very stupid.  Be completely unhinged.  Make the review between 100 and 150 words.  Please review " + movie.Title;
+
+            ChatCompletion completion = await _client.CompleteChatAsync(prompt);
             // Generate a hardcoded dummy review
             var review = new Review
             {
                 MovieId = movieId,
-                Content = "This movie was fantastic! A must-watch for everyone.",
+                Content = completion.Content[0].Text,
                 Rating = new Random().Next(0, 101),
                 ReviewerName = "John Doe"
             };
 
             // Retrieve the movie and add the review
-            var movie = await _context.Movie.Include(m => m.Reviews).FirstOrDefaultAsync(m => m.Id == movieId);
+            
             if (movie == null) return NotFound();
 
             movie.Reviews.Add(review); // Add the review to the movie's reviews
