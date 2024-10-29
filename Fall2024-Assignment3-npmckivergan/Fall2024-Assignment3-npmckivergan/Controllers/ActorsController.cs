@@ -10,6 +10,7 @@ using Fall2024_Assignment3_npmckivergan.Models;
 using Azure.AI.OpenAI;
 using OpenAI.Chat;
 using Microsoft.Identity.Client;
+using VaderSharp2;
 
 namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
@@ -199,16 +200,23 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         {
 
             var movie = await _context.Actor.Include(m => m.Tweets).FirstOrDefaultAsync(m => m.Id == movieId);
-            string prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, titties, ass, drugs, violence, explosions, and sports.\r\n\r\nInstructions: Write a Tweet about the particular actor or actress.  No more than 50 words but it can be a lot shorter.  Sound very stupid.  Be completely unhinged.  Feel free to use hashtags.  And you can say gay stuff about the guys too. Please review " + movie.Name;
-            ChatCompletion completion = await _client.CompleteChatAsync(prompt);
+            string review_prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, titties, ass, drugs, violence, explosions, and sports.\r\n\r\nInstructions: Write a Tweet about the particular actor or actress.  No more than 50 words but it can be a lot shorter.  Sound very stupid.  Be completely unhinged.  Feel free to use hashtags.  And you can say gay stuff about the guys too. Please review " + movie.Name;
+            string name_prompt = "Generate a random joke name similar to the following: \r\nD’Marcus Williums\r\nT.J. Juckson\r\nT’Variuness King\r\nTyroil Smoochie-Wallace\r\nD’Squarius Green, Jr.\r\nIbrahim Moizoos\r\nJackmerius Tacktheratrix\r\nD’Isiah T. Billings-Clyde\r\nD’Jasper Probincrux III\r\nLeoz Maxwell Jilliumz\r\nJavaris Jamar Javarison-Lamar\r\nDavoin Shower-Handel\r\nL’Carpetron Dookmarriot\r\nJ’Dinkalage Morgoone\r\nXmus Jaxon Flaxon-Waxon\r\nSaggitariutt Jefferspin\r\nD’Glester Hardunkichud\r\nSwirvithan L’Goodling-Splatt\r\nQuatro Quatro\r\nOzamataz Buckshank\r\nBeezer Twelve Washingbeard\r\nShakiraquan T.G.I.F. Carter\r\nSequester Grundelplith M.D.\r\nScoish Velociraptor Maloish\r\nT.J. A.J. R.J. Backslashinfourth V\r\nTorque Lewith\r\nSqueeeeeeeeeeps\r\nJammie Jammie-Jammie";
+            
+            ChatCompletion review_completion = await _client.CompleteChatAsync(review_prompt);
+            ChatCompletion name_completion = await _client.CompleteChatAsync(name_prompt);
+
+            //Sentiment analysis
+            var analyzer = new SentimentIntensityAnalyzer();
+            float sentiment = (float)analyzer.PolarityScores(review_completion.Content[0].Text).Compound;
 
             // Generate a hardcoded dummy review
             var review = new Review
             {
                 ActorId = movieId,
-                Content = completion.Content[0].Text,
-                Rating = new Random().Next(0, 101),
-                ReviewerName = "John Doe"
+                Content = review_completion.Content[0].Text,
+                Rating = sentiment,
+                ReviewerName = name_completion.Content[0].Text
             };
 
             // Retrieve the movie and add the review

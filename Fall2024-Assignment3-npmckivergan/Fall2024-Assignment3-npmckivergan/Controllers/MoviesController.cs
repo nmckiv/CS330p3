@@ -12,6 +12,7 @@ using OpenAI.Chat;
 using Azure.AI.OpenAI;
 using Azure.Identity;
 using Microsoft.AspNetCore.OutputCaching;
+using VaderSharp2;
 
 namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
@@ -75,6 +76,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Genre,Year,IMDB_link,Media")] Movie movie, IFormFile? Media)
         {
+            movie.OverallSentiment = 0;
             if (ModelState.IsValid)
             {
                 if (Media != null && Media.Length > 0)
@@ -188,23 +190,33 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         [HttpPost]
         public async Task<IActionResult> GenerateReview(int movieId)
         {
-
             var movie = await _context.Movie.Include(m => m.Reviews).FirstOrDefaultAsync(m => m.Id == movieId);
 
-            string prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, titties, ass, drugs, violence, explosions, and sports.  You think romance is gay.\\n\\nInstructions: Review the given movie from this point of view.  Sound very stupid.  Be completely unhinged.  Make the review between 100 and 150 words.  Please review " + movie.Title;
+            //Text generation
+            string review_prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, titties, ass, drugs, violence, explosions, and sports.  You think romance is gay.\\n\\nInstructions: Review the given movie from this point of view.  Sound very stupid.  Be completely unhinged.  Make the review between 100 and 150 words.  Please review " + movie.Title;
+            string name_prompt = "Generate a random joke name similar to the following: \r\nD’Marcus Williums\r\nT.J. Juckson\r\nT’Variuness King\r\nTyroil Smoochie-Wallace\r\nD’Squarius Green, Jr.\r\nIbrahim Moizoos\r\nJackmerius Tacktheratrix\r\nD’Isiah T. Billings-Clyde\r\nD’Jasper Probincrux III\r\nLeoz Maxwell Jilliumz\r\nJavaris Jamar Javarison-Lamar\r\nDavoin Shower-Handel\r\nL’Carpetron Dookmarriot\r\nJ’Dinkalage Morgoone\r\nXmus Jaxon Flaxon-Waxon\r\nSaggitariutt Jefferspin\r\nD’Glester Hardunkichud\r\nSwirvithan L’Goodling-Splatt\r\nQuatro Quatro\r\nOzamataz Buckshank\r\nBeezer Twelve Washingbeard\r\nShakiraquan T.G.I.F. Carter\r\nSequester Grundelplith M.D.\r\nScoish Velociraptor Maloish\r\nT.J. A.J. R.J. Backslashinfourth V\r\nTorque Lewith\r\nSqueeeeeeeeeeps\r\nJammie Jammie-Jammie";
+            
+            ChatCompletion review_completion = await _client.CompleteChatAsync(review_prompt);
+            ChatCompletion name_completion = await _client.CompleteChatAsync(name_prompt);
 
-            ChatCompletion completion = await _client.CompleteChatAsync(prompt);
+            //Sentiment analysis
+            var analyzer = new SentimentIntensityAnalyzer();
+            float sentiment = (float) analyzer.PolarityScores(review_completion.Content[0].Text).Compound;
+
             // Generate a hardcoded dummy review
             var review = new Review
             {
                 MovieId = movieId,
-                Content = completion.Content[0].Text,
-                Rating = new Random().Next(0, 101),
-                ReviewerName = "John Doe"
+                Content = review_completion.Content[0].Text,
+                Rating = sentiment,
+                ReviewerName = name_completion.Content[0].Text
             };
 
+            //Update sentiment
+            movie.OverallSentiment = (movie.OverallSentiment * ((float) movie.Reviews.Count) + sentiment) / ((float) movie.Reviews.Count + 1);
+
             // Retrieve the movie and add the review
-            
+
             if (movie == null) return NotFound();
 
             movie.Reviews.Add(review); // Add the review to the movie's reviews
@@ -238,6 +250,16 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 
             // Remove the review from the collection
             movie.Reviews.Remove(review);
+
+            //Update sentiment
+            if (movie.Reviews.Count() == 0)
+            {
+                movie.OverallSentiment = 0;
+            }
+            else
+            {
+                movie.OverallSentiment = (movie.OverallSentiment * ((float)movie.Reviews.Count + 1) - review.Rating) / ((float)movie.Reviews.Count);
+            }
 
             // Save changes to the database
             await _context.SaveChangesAsync();
