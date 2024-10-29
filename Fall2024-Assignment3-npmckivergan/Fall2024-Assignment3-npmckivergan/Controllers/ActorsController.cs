@@ -7,16 +7,30 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Fall2024_Assignment3_npmckivergan.Data;
 using Fall2024_Assignment3_npmckivergan.Models;
+using Azure.AI.OpenAI;
+using OpenAI.Chat;
+using Microsoft.Identity.Client;
 
 namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
     public class ActorsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ILogger<MoviesController> _logger;
 
-        public ActorsController(ApplicationDbContext context)
+        private readonly ApplicationDbContext _context;
+        private readonly ChatClient _client;
+
+        public ActorsController(ApplicationDbContext context, ILogger<MoviesController> logger)
         {
+            _logger = logger;
+
             _context = context;
+
+            var apiKey = "5c906e8218294152b82454d70be2277a";
+            var apiEndpoint = "https://fall2024-assignment1-npmckivergan-openai.openai.azure.com/";
+            AzureOpenAIClient chat = new(new Uri(apiEndpoint), new System.ClientModel.ApiKeyCredential(apiKey));
+
+            _client = chat.GetChatClient("gpt-35-turbo");
         }
 
         public async Task<IActionResult> GetActorPhoto(int id)
@@ -46,6 +60,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             }
 
             var actor = await _context.Actor
+                .Include(m => m.Tweets)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (actor == null)
             {
@@ -176,6 +191,60 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         private bool ActorExists(int id)
         {
             return _context.Actor.Any(e => e.Id == id);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GenerateReview(int movieId)
+        {
+
+            var movie = await _context.Actor.Include(m => m.Tweets).FirstOrDefaultAsync(m => m.Id == movieId);
+            string prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, titties, ass, drugs, violence, explosions, and sports.\r\n\r\nInstructions: Write a Tweet about the particular actor or actress.  No more than 50 words but it can be a lot shorter.  Sound very stupid.  Be completely unhinged.  Feel free to use hashtags.  And you can say gay stuff about the guys too. Please review " + movie.Name;
+            ChatCompletion completion = await _client.CompleteChatAsync(prompt);
+
+
+            // Generate a hardcoded dummy review
+            var review = new Review
+            {
+                MovieId = movieId,
+                Content = completion.Content[0].Text,
+                Rating = new Random().Next(0, 101),
+                ReviewerName = "John Doe"
+            };
+
+            // Retrieve the movie and add the review
+
+            if (movie == null) return NotFound();
+
+            movie.Tweets.Add(review); // Add the review to the movie's reviews
+
+            // Now save changes to the database
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = movieId });
+        }
+        public async Task<IActionResult> DeleteReview(int movieId, int reviewId)
+        {
+            // Retrieve the movie including its reviews
+            var movie = await _context.Actor
+                .Include(m => m.Tweets)
+                .FirstOrDefaultAsync(m => m.Id == movieId);
+
+            if (movie == null)
+                return NotFound();
+
+            // Find the review to delete
+            var review = movie.Tweets.FirstOrDefault(r => r.Id == reviewId);
+            if (review == null)
+                return NotFound();
+
+            // Remove the review from the collection
+            movie.Tweets.Remove(review);
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            // Redirect to the movie details page
+            return RedirectToAction("Details", new { id = movieId });
         }
     }
 }

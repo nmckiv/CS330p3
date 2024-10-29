@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fall2024_Assignment3_npmckivergan.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241028172026_Initial")]
+    [Migration("20241029034442_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -47,6 +47,9 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("OverallSentiment")
+                        .HasColumnType("real");
 
                     b.Property<byte[]>("Photo")
                         .HasColumnType("varbinary(max)");
@@ -121,6 +124,9 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ActorId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -136,6 +142,8 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ActorId");
 
                     b.HasIndex("MovieId");
 
@@ -365,6 +373,10 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
 
             modelBuilder.Entity("Fall2024_Assignment3_npmckivergan.Models.Review", b =>
                 {
+                    b.HasOne("Fall2024_Assignment3_npmckivergan.Models.Actor", null)
+                        .WithMany("Tweets")
+                        .HasForeignKey("ActorId");
+
                     b.HasOne("Fall2024_Assignment3_npmckivergan.Models.Movie", "Movie")
                         .WithMany("Reviews")
                         .HasForeignKey("MovieId")
@@ -423,6 +435,11 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fall2024_Assignment3_npmckivergan.Models.Actor", b =>
+                {
+                    b.Navigation("Tweets");
                 });
 
             modelBuilder.Entity("Fall2024_Assignment3_npmckivergan.Models.Movie", b =>

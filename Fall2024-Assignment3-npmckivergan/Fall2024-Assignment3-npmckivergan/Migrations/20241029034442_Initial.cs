@@ -21,7 +21,8 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Age = table.Column<int>(type: "int", nullable: false),
                     IMDB_link = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                    Photo = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    OverallSentiment = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -226,11 +227,17 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                     MovieId = table.Column<int>(type: "int", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Rating = table.Column<float>(type: "real", nullable: false),
-                    ReviewerName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ReviewerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActorId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Review", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Review_Actor_ActorId",
+                        column: x => x.ActorId,
+                        principalTable: "Actor",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Review_Movie_MovieId",
                         column: x => x.MovieId,
@@ -289,6 +296,11 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Review_ActorId",
+                table: "Review",
+                column: "ActorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Review_MovieId",
                 table: "Review",
                 column: "MovieId");
@@ -319,13 +331,13 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                 name: "Review");
 
             migrationBuilder.DropTable(
-                name: "Actor");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Actor");
 
             migrationBuilder.DropTable(
                 name: "Movie");
