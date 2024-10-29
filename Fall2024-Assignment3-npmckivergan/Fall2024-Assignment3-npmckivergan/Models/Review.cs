@@ -3,7 +3,8 @@
     public class Review
     {
         public int Id { get; set; }
-        public int MovieId { get; set; }
+        public int? MovieId { get; set; }
+        public int? ActorId { get; set; }
         public string Content { get; set; }
         public float Rating { get; set; }
         public string ReviewerName { get; set; }

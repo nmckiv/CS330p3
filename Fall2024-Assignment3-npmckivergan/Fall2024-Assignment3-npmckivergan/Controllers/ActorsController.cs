@@ -201,11 +201,10 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             string prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, titties, ass, drugs, violence, explosions, and sports.\r\n\r\nInstructions: Write a Tweet about the particular actor or actress.  No more than 50 words but it can be a lot shorter.  Sound very stupid.  Be completely unhinged.  Feel free to use hashtags.  And you can say gay stuff about the guys too. Please review " + movie.Name;
             ChatCompletion completion = await _client.CompleteChatAsync(prompt);
 
-
             // Generate a hardcoded dummy review
             var review = new Review
             {
-                MovieId = movieId,
+                ActorId = movieId,
                 Content = completion.Content[0].Text,
                 Rating = new Random().Next(0, 101),
                 ReviewerName = "John Doe"

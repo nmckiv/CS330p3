@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fall2024_Assignment3_npmckivergan.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241029034442_Initial")]
+    [Migration("20241029162810_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -131,7 +131,7 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MovieId")
+                    b.Property<int?>("MovieId")
                         .HasColumnType("int");
 
                     b.Property<float>("Rating")
@@ -379,9 +379,7 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
 
                     b.HasOne("Fall2024_Assignment3_npmckivergan.Models.Movie", "Movie")
                         .WithMany("Reviews")
-                        .HasForeignKey("MovieId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MovieId");
 
                     b.Navigation("Movie");
                 });

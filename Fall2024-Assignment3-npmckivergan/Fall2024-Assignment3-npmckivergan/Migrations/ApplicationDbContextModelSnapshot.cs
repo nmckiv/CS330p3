@@ -128,7 +128,7 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MovieId")
+                    b.Property<int?>("MovieId")
                         .HasColumnType("int");
 
                     b.Property<float>("Rating")
@@ -376,9 +376,7 @@ namespace Fall2024_Assignment3_npmckivergan.Migrations
 
                     b.HasOne("Fall2024_Assignment3_npmckivergan.Models.Movie", "Movie")
                         .WithMany("Reviews")
-                        .HasForeignKey("MovieId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MovieId");
 
                     b.Navigation("Movie");
                 });
