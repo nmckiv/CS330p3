@@ -18,16 +18,17 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         private readonly ILogger<MoviesController> _logger;
 
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _config;
         private readonly ChatClient _client;
 
-        public ActorsController(ApplicationDbContext context, ILogger<MoviesController> logger)
+        public ActorsController(ApplicationDbContext context, IConfiguration config, ILogger<MoviesController> logger)
         {
             _logger = logger;
-
+            _config = config;
             _context = context;
 
-            var apiKey = "5c906e8218294152b82454d70be2277a";
-            var apiEndpoint = "https://fall2024-assignment1-npmckivergan-openai.openai.azure.com/";
+            var apiKey = _config["OpenAI:Secret"];
+            var apiEndpoint = _config["OpenAI:Endpoint"];
             AzureOpenAIClient chat = new(new Uri(apiEndpoint), new System.ClientModel.ApiKeyCredential(apiKey));
 
             _client = chat.GetChatClient("gpt-35-turbo");

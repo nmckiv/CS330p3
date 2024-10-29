@@ -30,8 +30,8 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             _config = config;
             _logger = logger;
 
-            var apiKey = "5c906e8218294152b82454d70be2277a";
-            var apiEndpoint = "https://fall2024-assignment1-npmckivergan-openai.openai.azure.com/";
+            var apiKey = _config["OpenAI:Secret"];
+            var apiEndpoint = _config["OpenAI:Endpoint"];
             AzureOpenAIClient chat = new(new Uri(apiEndpoint), new System.ClientModel.ApiKeyCredential(apiKey));
 
             _client = chat.GetChatClient("gpt-35-turbo");
