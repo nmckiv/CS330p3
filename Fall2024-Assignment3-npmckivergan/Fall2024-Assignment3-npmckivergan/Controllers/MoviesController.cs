@@ -194,27 +194,29 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             
             ChatCompletion review_completion = await _client.CompleteChatAsync(review_prompt);
             ChatCompletion name_completion = await _client.CompleteChatAsync(name_prompt);
-
-            //Sentiment analysis
-            var analyzer = new SentimentIntensityAnalyzer();
-            float sentiment = (float) analyzer.PolarityScores(review_completion.Content[0].Text).Compound;
-
-            // Generate the review
-            var review = new Review
+            if (review_completion.Content != null)
             {
-                MovieId = movieId,
-                Content = review_completion.Content[0].Text,
-                Rating = sentiment,
-                ReviewerName = name_completion.Content[0].Text
-            };
+                //Sentiment analysis
+                var analyzer = new SentimentIntensityAnalyzer();
+                float sentiment = (float)analyzer.PolarityScores(review_completion.Content[0].Text).Compound;
 
-            //Update sentiment
-            movie.OverallSentiment = (movie.OverallSentiment * ((float) movie.Reviews.Count) + sentiment) / ((float) movie.Reviews.Count + 1);
+                // Generate the review
+                var review = new Review
+                {
+                    MovieId = movieId,
+                    Content = review_completion.Content[0].Text,
+                    Rating = sentiment,
+                    ReviewerName = name_completion.Content[0].Text
+                };
 
-            // Retrieve the movie and add the review
-            if (movie == null) return NotFound();
+                //Update sentiment
+                movie.OverallSentiment = (movie.OverallSentiment * ((float)movie.Reviews.Count) + sentiment) / ((float)movie.Reviews.Count + 1);
 
-            movie.Reviews.Add(review);
+                // Retrieve the movie and add the review
+                if (movie == null) return NotFound();
+
+                movie.Reviews.Add(review);
+            }
 
             // Now save changes to the database
             await _context.SaveChangesAsync();

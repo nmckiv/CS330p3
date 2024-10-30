@@ -205,27 +205,29 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             //Get AI chat completion
             ChatCompletion review_completion = await _client.CompleteChatAsync(review_prompt);
             ChatCompletion name_completion = await _client.CompleteChatAsync(name_prompt);
-
-            //Sentiment analysis
-            var analyzer = new SentimentIntensityAnalyzer();
-            float sentiment = (float)analyzer.PolarityScores(review_completion.Content[0].Text).Compound;
-
-            // Generate tweet
-            var review = new Review
+            if (review_completion.Content != null && review_completion.Content.Count > 0)
             {
-                ActorId = movieId,
-                Content = review_completion.Content[0].Text,
-                Rating = sentiment,
-                ReviewerName = name_completion.Content[0].Text
-            };
+                //Sentiment analysis
+                var analyzer = new SentimentIntensityAnalyzer();
+                float sentiment = (float)analyzer.PolarityScores(review_completion.Content[0].Text).Compound;
 
-            //Update sentiment
-            movie.OverallSentiment = (movie.OverallSentiment * ((float)movie.Tweets.Count) + sentiment) / ((float)movie.Tweets.Count + 1);
+                // Generate tweet
+                var review = new Review
+                {
+                    ActorId = movieId,
+                    Content = review_completion.Content[0].Text,
+                    Rating = sentiment,
+                    ReviewerName = name_completion.Content[0].Text
+                };
 
-            // Retrieve the movie and add the review
-            if (movie == null) return NotFound();
+                //Update sentiment
+                movie.OverallSentiment = (movie.OverallSentiment * ((float)movie.Tweets.Count) + sentiment) / ((float)movie.Tweets.Count + 1);
 
-            movie.Tweets.Add(review);
+                // Retrieve the movie and add the review
+                if (movie == null) return NotFound();
+
+                movie.Tweets.Add(review);
+            }
 
             // Now save changes to the database
             await _context.SaveChangesAsync();
