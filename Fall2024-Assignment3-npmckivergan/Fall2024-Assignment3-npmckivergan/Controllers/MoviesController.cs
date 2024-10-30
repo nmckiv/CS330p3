@@ -18,9 +18,6 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
     public class MoviesController : Controller
     {
-
-        private readonly ILogger<MoviesController> _logger;
-
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
         private readonly ChatClient _client;
@@ -29,7 +26,6 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         {
             _context = context;
             _config = config;
-            _logger = logger;
 
             var apiKey = _config["OpenAI:Secret"];
             var apiEndpoint = _config["OpenAI:Endpoint"];
@@ -203,7 +199,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             var analyzer = new SentimentIntensityAnalyzer();
             float sentiment = (float) analyzer.PolarityScores(review_completion.Content[0].Text).Compound;
 
-            // Generate a hardcoded dummy review
+            // Generate the review
             var review = new Review
             {
                 MovieId = movieId,
@@ -216,20 +212,12 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             movie.OverallSentiment = (movie.OverallSentiment * ((float) movie.Reviews.Count) + sentiment) / ((float) movie.Reviews.Count + 1);
 
             // Retrieve the movie and add the review
-
             if (movie == null) return NotFound();
 
-            movie.Reviews.Add(review); // Add the review to the movie's reviews
+            movie.Reviews.Add(review);
 
             // Now save changes to the database
             await _context.SaveChangesAsync();
-
-            var updatedMovie = await _context.Movie.Include(m => m.Reviews).FirstOrDefaultAsync(m => m.Id == movieId);
-            _logger.LogInformation($"Number of Reviews After Save: {updatedMovie.Reviews.Count}");
-            foreach (var rev in updatedMovie.Reviews)
-            {
-                _logger.LogInformation($"Review Content: {rev.Content}");
-            }
 
             return RedirectToAction("Details", new { id = movieId });
         }

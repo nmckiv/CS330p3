@@ -22,7 +22,7 @@
                 @Html.DisplayNameFor(model => model.Age)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.IMDB_link)
+                IMDB
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Photo)
@@ -43,14 +43,14 @@
                 @Html.DisplayFor(modelItem => item.Age)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.IMDB_link)
+                <a href="@item.IMDB_link" target="_blank">@item.IMDB_link</a>
             </td>
             <td>
                 @if (item.Photo != null)
                 {
                     var base64 = Convert.ToBase64String(item.Photo);
                     var imgSrc = string.Format("data:image/jpg;base64,{0}", base64);
-                    <img src="@imgSrc" height="100" width="100" style="border-radius:50%" />
+                    <img src="@imgSrc" height="225" width="150" style="border-radius:10%;" />
                 }
             </td>
             <td>

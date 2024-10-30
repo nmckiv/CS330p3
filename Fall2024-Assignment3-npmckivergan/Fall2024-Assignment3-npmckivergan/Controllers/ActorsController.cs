@@ -16,15 +16,12 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
     public class ActorsController : Controller
     {
-        private readonly ILogger<MoviesController> _logger;
-
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
         private readonly ChatClient _client;
 
         public ActorsController(ApplicationDbContext context, IConfiguration config, ILogger<MoviesController> logger)
         {
-            _logger = logger;
             _config = config;
             _context = context;
 
@@ -200,9 +197,12 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         {
 
             var movie = await _context.Actor.Include(m => m.Tweets).FirstOrDefaultAsync(m => m.Id == movieId);
+
+            //AI Prompts
             string review_prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, titties, ass, drugs, violence, explosions, and sports.\r\n\r\nInstructions: Write a Tweet about the particular actor or actress.  No more than 50 words but it can be a lot shorter.  Sound very stupid.  Be completely unhinged.  Feel free to use hashtags.  And you can say gay stuff about the guys too. Please review " + movie.Name;
             string name_prompt = "Generate a random joke name similar to the following: \r\nD’Marcus Williums\r\nT.J. Juckson\r\nT’Variuness King\r\nTyroil Smoochie-Wallace\r\nD’Squarius Green, Jr.\r\nIbrahim Moizoos\r\nJackmerius Tacktheratrix\r\nD’Isiah T. Billings-Clyde\r\nD’Jasper Probincrux III\r\nLeoz Maxwell Jilliumz\r\nJavaris Jamar Javarison-Lamar\r\nDavoin Shower-Handel\r\nL’Carpetron Dookmarriot\r\nJ’Dinkalage Morgoone\r\nXmus Jaxon Flaxon-Waxon\r\nSaggitariutt Jefferspin\r\nD’Glester Hardunkichud\r\nSwirvithan L’Goodling-Splatt\r\nQuatro Quatro\r\nOzamataz Buckshank\r\nBeezer Twelve Washingbeard\r\nShakiraquan T.G.I.F. Carter\r\nSequester Grundelplith M.D.\r\nScoish Velociraptor Maloish\r\nT.J. A.J. R.J. Backslashinfourth V\r\nTorque Lewith\r\nSqueeeeeeeeeeps\r\nJammie Jammie-Jammie";
             
+            //Get AI chat completion
             ChatCompletion review_completion = await _client.CompleteChatAsync(review_prompt);
             ChatCompletion name_completion = await _client.CompleteChatAsync(name_prompt);
 
@@ -210,7 +210,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             var analyzer = new SentimentIntensityAnalyzer();
             float sentiment = (float)analyzer.PolarityScores(review_completion.Content[0].Text).Compound;
 
-            // Generate a hardcoded dummy review
+            // Generate tweet
             var review = new Review
             {
                 ActorId = movieId,
@@ -219,11 +219,13 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                 ReviewerName = name_completion.Content[0].Text
             };
 
-            // Retrieve the movie and add the review
+            //Update sentiment
+            movie.OverallSentiment = (movie.OverallSentiment * ((float)movie.Tweets.Count) + sentiment) / ((float)movie.Tweets.Count + 1);
 
+            // Retrieve the movie and add the review
             if (movie == null) return NotFound();
 
-            movie.Tweets.Add(review); // Add the review to the movie's reviews
+            movie.Tweets.Add(review);
 
             // Now save changes to the database
             await _context.SaveChangesAsync();
@@ -247,6 +249,16 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 
             // Remove the review from the collection
             movie.Tweets.Remove(review);
+
+            //Update sentiment
+            if (movie.Tweets.Count() == 0)
+            {
+                movie.OverallSentiment = 0;
+            }
+            else
+            {
+                movie.OverallSentiment = (movie.OverallSentiment * ((float)movie.Tweets.Count + 1) - review.Rating) / ((float)movie.Tweets.Count);
+            }
 
             // Save changes to the database
             await _context.SaveChangesAsync();
