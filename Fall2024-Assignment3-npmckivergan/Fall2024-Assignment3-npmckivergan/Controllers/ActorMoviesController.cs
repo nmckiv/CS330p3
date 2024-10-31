@@ -77,7 +77,6 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             ModelState.Remove(nameof(viewModel.Movies));
             if (ModelState.IsValid)
             {
-                _logger.LogInformation("Debug statement hit===============================.");
                 bool alreadyExists = await _context.ActorMovie
                     .AnyAsync(m => m.MovieId == viewModel.MovieId && m.ActorId == viewModel.ActorId);
 
@@ -96,14 +95,6 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 
                 ModelState.AddModelError("", "Cannot add the same entry multiple times");
             }
-            else
-            {
-                _logger.LogInformation("Errors============================================.\n");
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    _logger.LogError(error.ErrorMessage);
-                }
-            }
 
             viewModel.Movies = await _context.Movie.Select(m => new SelectListItem
             {
@@ -120,7 +111,6 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             return View(viewModel);
         }
 
-        // GET: ActorMovies/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -136,6 +126,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 
             var viewModel = new ActorMovieCreateViewModel
             {
+                Id = actorMovie.Id,
                 MovieId = actorMovie.MovieId,
                 ActorId = actorMovie.ActorId,
                 Movies = await _context.Movie.Select(m => new SelectListItem
@@ -153,15 +144,16 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             return View(viewModel);
         }
 
-        // POST: ActorMovies/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ActorMovieCreateViewModel viewModel)
         {
-            if (id != viewModel.MovieId)
+            if (id != viewModel.Id)
             {
                 return NotFound();
             }
+            ModelState.Remove(nameof(viewModel.Actors));
+            ModelState.Remove(nameof(viewModel.Movies));
 
             if (ModelState.IsValid)
             {
@@ -182,7 +174,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ActorMovieExists(viewModel.MovieId))
+                    if (!ActorMovieExists(id))
                     {
                         return NotFound();
                     }
@@ -193,7 +185,6 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                 }
             }
 
-            // Repopulate the select lists if model state is invalid
             viewModel.Movies = await _context.Movie.Select(m => new SelectListItem
             {
                 Value = m.Id.ToString(),
