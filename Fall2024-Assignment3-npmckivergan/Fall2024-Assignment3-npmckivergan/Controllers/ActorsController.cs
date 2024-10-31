@@ -163,6 +163,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             }
 
             var actor = await _context.Actor
+                .Include(m => m.Tweets)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (actor == null)
             {
@@ -177,14 +178,33 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var actor = await _context.Actor.FindAsync(id);
-            if (actor != null)
-            {
-                _context.Actor.Remove(actor);
-            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var actor = await _context.Actor
+                    .Include(a => a.Tweets)
+                    .FirstOrDefaultAsync(a => a.Id == id);
+
+                if (actor != null)
+                {
+                    // Delete associated reviews first
+                    _context.Review.RemoveRange(actor.Tweets);
+
+                    // Delete the actor after reviews have been removed
+                    _context.Actor.Remove(actor);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return Problem("Unable to delete the actor due to a database error.");
+            }
         }
 
         private bool ActorExists(int id)

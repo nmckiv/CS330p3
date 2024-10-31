@@ -168,14 +168,33 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var movie = await _context.Movie.FindAsync(id);
-            if (movie != null)
-            {
-                _context.Movie.Remove(movie);
-            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var movie = await _context.Movie
+                    .Include(m => m.Reviews)
+                    .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (movie != null)
+                {
+                    // Delete associated reviews first
+                    _context.Review.RemoveRange(movie.Reviews);
+
+                    // Delete the movie after reviews have been removed
+                    _context.Movie.Remove(movie);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return Problem("Unable to delete the movie due to a database error.");
+            }
         }
 
         private bool MovieExists(int id)
