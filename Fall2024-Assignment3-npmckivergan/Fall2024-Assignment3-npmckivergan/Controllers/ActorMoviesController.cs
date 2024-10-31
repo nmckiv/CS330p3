@@ -92,7 +92,6 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                 ModelState.AddModelError("", "Cannot add the same entry multiple times");
             }
 
-            // Repopulate the select lists if model state is invalid
             viewModel.Movies = await _context.Movie.Select(m => new SelectListItem
             {
                 Value = m.Id.ToString(),
@@ -146,7 +145,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ActorMovieCreateViewModel viewModel)
         {
-            if (id != viewModel.MovieId) // Assuming you're comparing with MovieId here, adjust if needed
+            if (id != viewModel.MovieId)
             {
                 return NotFound();
             }
@@ -170,7 +169,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ActorMovieExists(viewModel.MovieId)) // Adjust this based on your logic
+                    if (!ActorMovieExists(viewModel.MovieId))
                     {
                         return NotFound();
                     }

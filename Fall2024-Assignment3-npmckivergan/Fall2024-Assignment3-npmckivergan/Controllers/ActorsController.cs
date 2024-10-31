@@ -86,7 +86,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             {
                 if (Photo != null && Photo.Length > 0)
                 {
-                    using var memoryStream = new MemoryStream(); // Dispose() for garbage collection 
+                    using var memoryStream = new MemoryStream();
                     await Photo.CopyToAsync(memoryStream);
                     actor.Photo = memoryStream.ToArray();
                 }
@@ -131,7 +131,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                 {
                     if (Photo != null && Photo.Length > 0)
                     {
-                        using var memoryStream = new MemoryStream(); // Dispose() for garbage collection 
+                        using var memoryStream = new MemoryStream();
                         await Photo.CopyToAsync(memoryStream);
                         actor.Photo = memoryStream.ToArray();
                     }
@@ -188,7 +188,6 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
 
                 if (actor != null)
                 {
-                    // Delete associated reviews first
                     _context.Review.RemoveRange(actor.Tweets);
 
                     // Delete the actor after reviews have been removed
@@ -219,7 +218,7 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             var movie = await _context.Actor.Include(m => m.Tweets).FirstOrDefaultAsync(m => m.Id == movieId);
 
             //AI Prompts
-            string review_prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot women, partying, drugs and alcohol, violence, explosions, and sports.\r\n\r\nInstructions: Write a Tweet about the particular actor or actress.  No more than 50 words but it can be a lot shorter.  Sound very stupid.  Be completely unhinged.  Feel free to use hashtags.  And you can say gay stuff about the guys too. Please review " + movie.Name;
+            string review_prompt = "Context: You are a dumb football player with the IQ of a rock.  You love simple things and hate anything your pea-sized brain can't follow.  You love hot babes, partying, drugs and alcohol, violence, explosions, and sports.\r\n\r\nInstructions: Write a Tweet about the particular actor or actress.  No more than 50 words but it can be a lot shorter.  Sound very stupid.  Be completely unhinged.  Feel free to use hashtags.  And you can say gay stuff about the guys too. Please review " + movie.Name;
             string name_prompt = "Generate a random joke name similar to the following: \r\nD’Marcus Williums\r\nT.J. Juckson\r\nT’Variuness King\r\nTyroil Smoochie-Wallace\r\nD’Squarius Green, Jr.\r\nIbrahim Moizoos\r\nJackmerius Tacktheratrix\r\nD’Isiah T. Billings-Clyde\r\nD’Jasper Probincrux III\r\nLeoz Maxwell Jilliumz\r\nJavaris Jamar Javarison-Lamar\r\nDavoin Shower-Handel\r\nL’Carpetron Dookmarriot\r\nJ’Dinkalage Morgoone\r\nXmus Jaxon Flaxon-Waxon\r\nSaggitariutt Jefferspin\r\nD’Glester Hardunkichud\r\nSwirvithan L’Goodling-Splatt\r\nQuatro Quatro\r\nOzamataz Buckshank\r\nBeezer Twelve Washingbeard\r\nShakiraquan T.G.I.F. Carter\r\nSequester Grundelplith M.D.\r\nScoish Velociraptor Maloish\r\nT.J. A.J. R.J. Backslashinfourth V\r\nTorque Lewith\r\nSqueeeeeeeeeeps\r\nJammie Jammie-Jammie";
             
             //Get AI chat completion

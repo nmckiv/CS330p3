@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fall2024_Assignment3_npmckivergan.Models
 {
-    //[PrimaryKey("MovieId", "ActorId")]
     public class ActorMovie
     {
         [Key]

@@ -6,23 +6,23 @@
 
 <style>
     .content {
-        background-color: rgba(255, 255, 255, 0.9); /* Light background */
-        padding: 20px; /* Padding around the content */
-        border-radius: 10px; /* Rounded corners */
-        color: #000; /* Dark text */
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 10px;
+        color: #000;
     }
 
     h1, h3 {
-        color: #333; /* Dark gray for headers */
+        color: #333;
     }
 
     .btn {
-        margin-top: 10px; /* Space above the buttons */
+        margin-top: 10px; 
     }
 
     .confirmation-message {
-        margin-bottom: 20px; /* Space below the confirmation message */
-        font-weight: bold; /* Bold for emphasis */
+        margin-bottom: 20px;
+        font-weight: bold;
     }
 </style>
 
@@ -39,13 +39,13 @@
                 @Html.DisplayNameFor(model => model.Movie)
             </dt>
             <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Movie.Title) <!-- Display movie title instead of ID -->
+                @Html.DisplayFor(model => model.Movie.Title)
             </dd>
             <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.Actor)
             </dt>
             <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Actor.Name) <!-- Display actor name instead of ID -->
+                @Html.DisplayFor(model => model.Actor.Name)
             </dd>
         </dl>
     </div>

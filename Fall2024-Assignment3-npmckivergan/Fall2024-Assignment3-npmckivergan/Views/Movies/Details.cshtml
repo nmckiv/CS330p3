@@ -6,41 +6,41 @@
 
 <style>
     .content {
-        background-color: rgba(255, 255, 255, 0.9); /* Bright white background */
-        padding: 20px; /* Add some padding */
-        border-radius: 10px; /* Rounded corners */
-        color: #000000; /* Dark text color for readability */
-        margin-bottom: 20px; /* Space below the content */
+        background-color: rgba(255, 255, 255, 0.9); 
+        padding: 20px; 
+        border-radius: 10px; 
+        color: #000000; 
+        margin-bottom: 20px;
     }
 
     h4 {
-        color: #333; /* Dark gray for headers to stand out */
+        color: #333; 
     }
 
     table {
-        background-color: #f8f9fa; /* Light background for the table */
-        color: #000; /* Dark text for table content */
+        background-color: #f8f9fa; 
+        color: #000; 
     }
 
     .button {
         display: inline-block;
-        padding: 10px 15px; /* Padding for the button */
-        margin-top: 10px; /* Margin on top for spacing */
-        margin-right: 5px; /* Space between buttons */
-        border-radius: 5px; /* Rounded corners */
-        background-color: #1e90ff; /* Bright blue background */
-        color: #ffffff; /* White text */
-        text-decoration: none; /* No underline */
-        transition: background-color 0.3s; /* Transition effect */
+        padding: 10px 15px; 
+        margin-top: 10px; 
+        margin-right: 5px; 
+        border-radius: 5px; 
+        background-color: #1e90ff; 
+        color: #ffffff; 
+        text-decoration: none; 
+        transition: background-color 0.3s; 
     }
 
         .button:hover {
-            background-color: #ffa500; /* Change color on hover */
+            background-color: #ffa500;
         }
 
     .generate-review-btn {
-        background-color: #28a745; /* Green background for generate button */
-        color: #ffffff; /* White text */
+        background-color: #28a745; 
+        color: #ffffff; 
     }
 </style>
 
@@ -81,7 +81,6 @@
         <button class="btn btn-success generate-review-btn" type="button" data-movie-id="@Model.Id">Generate New Review</button>
     </div>
 
-    <!-- AI Generated Reviews and Sentiment Analysis -->
     <div>
         <h4>Sentiment Analysis of AI-Generated Reviews</h4>
         <hr />
@@ -97,13 +96,13 @@
             </thead>
             <tbody id="reviewsTableBody">
                 @{
-                    if (Model.Reviews.Any()) // Check if there are reviews
+                    if (Model.Reviews.Any()) 
                     {
                         foreach (var review in Model.Reviews)
                         {
                             <tr>
                                 <td>@review.Content</td>
-                                <td>@(review.Rating)</td> <!-- Ensure Rating is displayed correctly -->
+                                <td>@(review.Rating)</td> 
                                 <td>@review.ReviewerName</td>
                                 <td>
                                     <form asp-action="DeleteReview" asp-route-movieId="@Model.Id" asp-route-reviewId="@review.Id" method="post" style="display:inline;">
@@ -116,7 +115,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="4">No reviews available.</td> <!-- Updated colspan to 4 to account for Delete column -->
+                            <td colspan="4">No reviews available.</td> 
                         </tr>
                     }
                 }
