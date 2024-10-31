@@ -27,13 +27,19 @@
             background-color: rgba(255, 255, 255, 0.05); /* Slightly darker for table cells */
         }
 
-    a {
-        color: #1e90ff; /* Bright blue for links */
-        text-decoration: underline; /* Underline for links */
+    a.button {
+        display: inline-block;
+        padding: 10px 15px; /* Padding for the button */
+        margin: 5px; /* Margin for spacing */
+        border-radius: 5px; /* Rounded corners */
+        background-color: #1e90ff; /* Bright blue background */
+        color: #ffffff; /* White text */
+        text-decoration: none; /* No underline */
+        transition: background-color 0.3s; /* Transition effect */
     }
 
-        a:hover {
-            color: #ffa500; /* Change color on hover */
+        a.button:hover {
+            background-color: #ffa500; /* Change color on hover */
         }
 
     img {
@@ -45,7 +51,7 @@
     <h1>Index</h1>
 
     <p>
-        <a asp-action="Create" style="color: #f0f0f0;">Create New</a>
+        <a asp-action="Create" class="button">Create New</a>
     </p>
 
     <table class="table">
@@ -94,9 +100,9 @@
                         }
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="button">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id" class="button">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="button">Delete</a>
                     </td>
                 </tr>
             }

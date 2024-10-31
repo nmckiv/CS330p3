@@ -4,98 +4,132 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<style>
+    .content {
+        background-color: rgba(255, 255, 255, 0.9); /* Bright white background */
+        padding: 20px; /* Add some padding */
+        border-radius: 10px; /* Rounded corners */
+        color: #000000; /* Dark text color for readability */
+        margin-bottom: 20px; /* Space below the content */
+    }
 
-<div>
-    <h4>Movie</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Genre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Genre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Year)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Year)
-        </dd>
-        <dt class = "col-sm-2">
-            IMDB
-        </dt>
-        <dd class = "col-sm-10">
-            <a href="@Model.IMDB_link" target="_blank">@Model.IMDB_link</a>
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Media)
-        </dt>
-        <dd class = "col-sm-10">
-            @if (Model.Media != null)
-            {
-                var base64 = Convert.ToBase64String(Model.Media);
-                var imgSrc = string.Format("data:image/jpg;base64,{0}", base64);
-                <img src="@imgSrc" height="225" width="150" style="border-radius:10%" />
-            }
-        </dd>
-    </dl>
-</div>
-<div>
-    <button class="btn btn-success generate-review-btn" type="button" data-movie-id="@Model.Id">Generate New Review</button>
-</div>
-<!-- AI Generated Reviews and Sentiment Analysis -->
-<div>
-    <h4>Sentiment Analysis of AI-Generated Reviews</h4>
-    <hr />
-    <h5>Overall Sentiment: @Model.OverallSentiment</h5>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Review Text</th>
-                <th scope="col">Score (%)</th>
-                <th scope="col">Reviewer Name</th>
-            </tr>
-        </thead>
-        <tbody id="reviewsTableBody">
-            @{
-                @if (Model.Reviews.Count() > 0) // Check if there are reviews
+    h4 {
+        color: #333; /* Dark gray for headers to stand out */
+    }
+
+    table {
+        background-color: #f8f9fa; /* Light background for the table */
+        color: #000; /* Dark text for table content */
+    }
+
+    .button {
+        display: inline-block;
+        padding: 10px 15px; /* Padding for the button */
+        margin-top: 10px; /* Margin on top for spacing */
+        margin-right: 5px; /* Space between buttons */
+        border-radius: 5px; /* Rounded corners */
+        background-color: #1e90ff; /* Bright blue background */
+        color: #ffffff; /* White text */
+        text-decoration: none; /* No underline */
+        transition: background-color 0.3s; /* Transition effect */
+    }
+
+        .button:hover {
+            background-color: #ffa500; /* Change color on hover */
+        }
+
+    .generate-review-btn {
+        background-color: #28a745; /* Green background for generate button */
+        color: #ffffff; /* White text */
+    }
+</style>
+
+<div class="content text-center">
+    <h1>Details</h1>
+
+    <div>
+        <h4>Movie</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Title)</dt>
+            <dd class="col-sm-10">@Html.DisplayFor(model => model.Title)</dd>
+
+            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Genre)</dt>
+            <dd class="col-sm-10">@Html.DisplayFor(model => model.Genre)</dd>
+
+            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Year)</dt>
+            <dd class="col-sm-10">@Html.DisplayFor(model => model.Year)</dd>
+
+            <dt class="col-sm-2">IMDB</dt>
+            <dd class="col-sm-10">
+                <a href="@Model.IMDB_link" target="_blank">@Model.IMDB_link</a>
+            </dd>
+
+            <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Media)</dt>
+            <dd class="col-sm-10">
+                @if (Model.Media != null)
                 {
+                    var base64 = Convert.ToBase64String(Model.Media);
+                    var imgSrc = string.Format("data:image/jpg;base64,{0}", base64);
+                    <img src="@imgSrc" height="225" width="150" style="border-radius:10%;" />
+                }
+            </dd>
+        </dl>
+    </div>
 
-                    foreach (var review in Model.Reviews)
+    <div>
+        <button class="btn btn-success generate-review-btn" type="button" data-movie-id="@Model.Id">Generate New Review</button>
+    </div>
 
+    <!-- AI Generated Reviews and Sentiment Analysis -->
+    <div>
+        <h4>Sentiment Analysis of AI-Generated Reviews</h4>
+        <hr />
+        <h5>Overall Sentiment: @Model.OverallSentiment</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Review Text</th>
+                    <th scope="col">Sentiment</th>
+                    <th scope="col">Reviewer Name</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="reviewsTableBody">
+                @{
+                    if (Model.Reviews.Any()) // Check if there are reviews
+                    {
+                        foreach (var review in Model.Reviews)
+                        {
+                            <tr>
+                                <td>@review.Content</td>
+                                <td>@(review.Rating)</td> <!-- Ensure Rating is displayed correctly -->
+                                <td>@review.ReviewerName</td>
+                                <td>
+                                    <form asp-action="DeleteReview" asp-route-movieId="@Model.Id" asp-route-reviewId="@review.Id" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@review.Content</td>
-                            <td>@(review.Rating)</td> <!-- Ensure Rating is displayed correctly -->
-                            <td>@review.ReviewerName</td>
-                            <td>
-                                <form asp-action="DeleteReview" asp-route-movieId="@Model.Id" asp-route-reviewId="@review.Id" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn-danger" >Delete</button>
-                                </form>
-                            </td>
+                            <td colspan="4">No reviews available.</td> <!-- Updated colspan to 4 to account for Delete column -->
                         </tr>
                     }
                 }
-                else
-                {
-                    <tr>
-                        <td colspan="4">No reviews available.</td> <!-- Updated colspan to 4 to account for Delete column -->
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="button">Edit</a>
+        <a asp-action="Index" class="button">Back to List</a>
+    </div>
 </div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
     <script src="~/js/addReview.js"></script>

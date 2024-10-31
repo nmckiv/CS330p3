@@ -4,27 +4,47 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<style>
+    .content {
+        background-color: rgba(255, 255, 255, 0.9); /* Light background */
+        padding: 20px; /* Padding around the content */
+        border-radius: 10px; /* Rounded corners */
+        color: #000; /* Dark text */
+    }
 
-<div>
-    <h4>ActorMovie</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Movie)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Movie.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Actor)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Actor.Id)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    h1 {
+        color: #333; /* Dark gray for header */
+    }
+
+    .btn {
+        margin-top: 10px; /* Space above the buttons */
+    }
+</style>
+
+<div class="content">
+    <h1>Details</h1>
+
+    <div>
+        <h4>ActorMovie</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Movie)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Movie.Title)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Actor)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Actor.Name)
+            </dd>
+        </dl>
+    </div>
+
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a> |
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
 </div>

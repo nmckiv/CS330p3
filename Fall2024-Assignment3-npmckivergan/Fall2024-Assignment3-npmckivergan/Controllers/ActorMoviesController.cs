@@ -71,8 +71,8 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ModelState.AddModelError("", "Cannot add the same entry multiple times");
-            ViewData["ActorId"] = new SelectList(_context.Actor, "Id", "Name", actorMovie.ActorId);
-            ViewData["MovieId"] = new SelectList(_context.Movie, "Id", "Title", actorMovie.MovieId);
+            ViewData["Actor"] = new SelectList(_context.Actor, "Id", "Name", actorMovie.ActorId);
+            ViewData["Movie"] = new SelectList(_context.Movie, "Id", "Title", actorMovie.MovieId);
             return View(actorMovie);
         }
 
@@ -89,8 +89,8 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             {
                 return NotFound();
             }
-            ViewData["ActorId"] = new SelectList(_context.Actor, "Id", "Id", actorMovie.ActorId);
-            ViewData["MovieId"] = new SelectList(_context.Movie, "Id", "Id", actorMovie.MovieId);
+            ViewData["Actor"] = new SelectList(_context.Actor, "Id", "Name");
+            ViewData["Movie"] = new SelectList(_context.Movie, "Id", "Title");
             return View(actorMovie);
         }
 

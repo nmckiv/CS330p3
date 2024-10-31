@@ -4,50 +4,87 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<style>
+    .content {
+        background-color: rgba(255, 255, 255, 0.9); /* Light background */
+        padding: 20px; /* Padding for spacing */
+        border-radius: 10px; /* Rounded corners */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+        margin-bottom: 20px; /* Space below the content */
+    }
 
-<h4>Actor</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Gender" class="control-label"></label>
-                <input asp-for="Gender" class="form-control" />
-                <span asp-validation-for="Gender" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Age" class="control-label"></label>
-                <input asp-for="Age" class="form-control" />
-                <span asp-validation-for="Age" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IMDB_link" class="control-label"></label>
-                <input asp-for="IMDB_link" class="form-control" />
-                <span asp-validation-for="IMDB_link" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Photo" class="control-label"></label>
-                <input type="file" id="Photo" name="Photo" class="form-control" />
-                <span asp-validation-for="Photo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+    .button {
+        display: inline-block;
+        padding: 10px 15px; /* Padding for the button */
+        margin-top: 10px; /* Margin on top for spacing */
+        margin-right: 5px; /* Space between buttons */
+        border-radius: 5px; /* Rounded corners */
+        background-color: #1e90ff; /* Bright blue background */
+        color: #ffffff; /* White text */
+        text-decoration: none; /* No underline */
+        transition: background-color 0.3s; /* Transition effect */
+    }
+
+    .button:hover {
+        background-color: #ffa500; /* Change color on hover */
+    }
+</style>
+
+<div class="content">
+    <h1>Create</h1>
+
+    <h4>Actor</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <!-- Center the form on medium and larger screens -->
+            <form asp-action="Create" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Gender" class="control-label"></label>
+                    <input asp-for="Gender" class="form-control" />
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Age" class="control-label"></label>
+                    <input asp-for="Age" class="form-control" type="number" min="0" />
+                    <span asp-validation-for="Age" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="IMDB_link" class="control-label"></label>
+                    <input asp-for="IMDB_link" class="form-control" />
+                    <span asp-validation-for="IMDB_link" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Photo" class="control-label"></label>
+                    <input type="file" id="Photo" name="Photo" class="form-control" />
+                    <span asp-validation-for="Photo" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="button">Back to List</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
