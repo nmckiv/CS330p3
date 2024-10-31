@@ -1,4 +1,18 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿// Array of image paths
+const images = [
+    '/images/football_players/player1.jfif',
+    '/images/football_players/player2.jfif',
+    '/images/football_players/player3.jfif',
+    '/images/football_players/player4.jfif'
+    // Add more image paths as needed
+];
 
-// Write your JavaScript code.
+// Function to pick a random image
+function loadRandomImage() {
+    const randomIndex = Math.floor(Math.random() * images.length);
+    const imagePath = images[randomIndex]; // Directly use the path
+    document.getElementById('randomPlayer').src = imagePath;
+}
+
+// Load a random image when the page loads
+window.onload = loadRandomImage;

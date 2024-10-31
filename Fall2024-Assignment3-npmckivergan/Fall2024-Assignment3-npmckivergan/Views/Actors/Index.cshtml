@@ -4,61 +4,102 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<style>
+    .content {
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+        padding: 20px; /* Add some padding */
+        border-radius: 10px; /* Rounded corners */
+        color: #f0f0f0; /* Light text color */
+        margin-bottom: 20px; /* Space below the content */
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Gender)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Age)
-            </th>
-            <th>
-                IMDB
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Photo)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Gender)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Age)
-            </td>
-            <td>
-                <a href="@item.IMDB_link" target="_blank">@item.IMDB_link</a>
-            </td>
-            <td>
-                @if (item.Photo != null)
-                {
-                    var base64 = Convert.ToBase64String(item.Photo);
-                    var imgSrc = string.Format("data:image/jpg;base64,{0}", base64);
-                    <img src="@imgSrc" height="225" width="150" style="border-radius:10%;" />
-                }
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    .table {
+        width: 100%; /* Full width */
+        color: #f0f0f0; /* Light text for table */
+    }
+
+        .table th {
+            background-color: rgba(255, 255, 255, 0.1); /* Light transparent background for headers */
+            color: #ffffff; /* White text color for headers */
+        }
+
+        .table td {
+            background-color: rgba(255, 255, 255, 0.05); /* Slightly darker for table cells */
+        }
+
+    a {
+        color: #1e90ff; /* Bright blue for links */
+        text-decoration: underline; /* Underline for links */
+    }
+
+        a:hover {
+            color: #ffa500; /* Change color on hover */
+        }
+
+    img {
+        border-radius: 10%; /* Rounded image corners */
+    }
+</style>
+
+<div class="content text-center">
+    <h1>Index</h1>
+
+    <p>
+        <a asp-action="Create" style="color: #f0f0f0;">Create New</a>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Gender)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Age)
+                </th>
+                <th>
+                    IMDB
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Photo)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Gender)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Age)
+                    </td>
+                    <td>
+                        <a href="@item.IMDB_link" target="_blank">@item.IMDB_link</a>
+                    </td>
+                    <td>
+                        @if (item.Photo != null)
+                        {
+                            var base64 = Convert.ToBase64String(item.Photo);
+                            var imgSrc = string.Format("data:image/jpg;base64,{0}", base64);
+                            <img src="@imgSrc" height="225" width="150" />
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
