@@ -13,10 +13,12 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
     public class ActorMoviesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<ActorMoviesController> _logger;
 
-        public ActorMoviesController(ApplicationDbContext context)
+        public ActorMoviesController(ApplicationDbContext context, ILogger<ActorMoviesController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: ActorMovies
@@ -71,8 +73,11 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ActorMovieCreateViewModel viewModel)
         {
+            ModelState.Remove(nameof(viewModel.Actors));
+            ModelState.Remove(nameof(viewModel.Movies));
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Debug statement hit===============================.");
                 bool alreadyExists = await _context.ActorMovie
                     .AnyAsync(m => m.MovieId == viewModel.MovieId && m.ActorId == viewModel.ActorId);
 
@@ -90,6 +95,14 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                 }
 
                 ModelState.AddModelError("", "Cannot add the same entry multiple times");
+            }
+            else
+            {
+                _logger.LogInformation("Errors============================================.\n");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogError(error.ErrorMessage);
+                }
             }
 
             viewModel.Movies = await _context.Movie.Select(m => new SelectListItem
