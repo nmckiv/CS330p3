@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Fall2024_Assignment3_npmckivergan.Data;
 using Fall2024_Assignment3_npmckivergan.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Fall2024_Assignment3_npmckivergan.Controllers
 {
@@ -47,33 +47,65 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
         }
 
         // GET: ActorMovies/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["ActorId"] = new SelectList(_context.Actor, "Id", "Name");
-            ViewData["MovieId"] = new SelectList(_context.Movie, "Id", "Title");
-            return View();
+            var viewModel = new ActorMovieCreateViewModel
+            {
+                Movies = await _context.Movie.Select(m => new SelectListItem
+                {
+                    Value = m.Id.ToString(),
+                    Text = m.Title
+                }).ToListAsync(),
+                Actors = await _context.Actor.Select(a => new SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.Name
+                }).ToListAsync()
+            };
+
+            return View(viewModel);
         }
 
         // POST: ActorMovies/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,MovieId,ActorId")] ActorMovie actorMovie)
+        public async Task<IActionResult> Create(ActorMovieCreateViewModel viewModel)
         {
-            bool alreadyExists = await _context.ActorMovie
-                .AnyAsync(m => m.MovieId == actorMovie.MovieId && m.ActorId == actorMovie.ActorId);
-            
-            if (ModelState.IsValid && !alreadyExists)
+            if (ModelState.IsValid)
             {
-                _context.Add(actorMovie);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                bool alreadyExists = await _context.ActorMovie
+                    .AnyAsync(m => m.MovieId == viewModel.MovieId && m.ActorId == viewModel.ActorId);
+
+                if (!alreadyExists)
+                {
+                    var actorMovie = new ActorMovie
+                    {
+                        MovieId = viewModel.MovieId,
+                        ActorId = viewModel.ActorId
+                    };
+
+                    _context.Add(actorMovie);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+
+                ModelState.AddModelError("", "Cannot add the same entry multiple times");
             }
-            ModelState.AddModelError("", "Cannot add the same entry multiple times");
-            ViewData["Actor"] = new SelectList(_context.Actor, "Id", "Name", actorMovie.ActorId);
-            ViewData["Movie"] = new SelectList(_context.Movie, "Id", "Title", actorMovie.MovieId);
-            return View(actorMovie);
+
+            // Repopulate the select lists if model state is invalid
+            viewModel.Movies = await _context.Movie.Select(m => new SelectListItem
+            {
+                Value = m.Id.ToString(),
+                Text = m.Title
+            }).ToListAsync();
+
+            viewModel.Actors = await _context.Actor.Select(a => new SelectListItem
+            {
+                Value = a.Id.ToString(),
+                Text = a.Name
+            }).ToListAsync();
+
+            return View(viewModel);
         }
 
         // GET: ActorMovies/Edit/5
@@ -89,19 +121,32 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             {
                 return NotFound();
             }
-            ViewData["Actor"] = new SelectList(_context.Actor, "Id", "Name");
-            ViewData["Movie"] = new SelectList(_context.Movie, "Id", "Title");
-            return View(actorMovie);
+
+            var viewModel = new ActorMovieCreateViewModel
+            {
+                MovieId = actorMovie.MovieId,
+                ActorId = actorMovie.ActorId,
+                Movies = await _context.Movie.Select(m => new SelectListItem
+                {
+                    Value = m.Id.ToString(),
+                    Text = m.Title
+                }).ToListAsync(),
+                Actors = await _context.Actor.Select(a => new SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.Name
+                }).ToListAsync()
+            };
+
+            return View(viewModel);
         }
 
         // POST: ActorMovies/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,MovieId,ActorId")] ActorMovie actorMovie)
+        public async Task<IActionResult> Edit(int id, ActorMovieCreateViewModel viewModel)
         {
-            if (id != actorMovie.Id)
+            if (id != viewModel.MovieId) // Assuming you're comparing with MovieId here, adjust if needed
             {
                 return NotFound();
             }
@@ -110,12 +155,22 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
             {
                 try
                 {
+                    var actorMovie = await _context.ActorMovie.FindAsync(id);
+                    if (actorMovie == null)
+                    {
+                        return NotFound();
+                    }
+
+                    actorMovie.MovieId = viewModel.MovieId;
+                    actorMovie.ActorId = viewModel.ActorId;
+
                     _context.Update(actorMovie);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ActorMovieExists(actorMovie.Id))
+                    if (!ActorMovieExists(viewModel.MovieId)) // Adjust this based on your logic
                     {
                         return NotFound();
                     }
@@ -124,11 +179,22 @@ namespace Fall2024_Assignment3_npmckivergan.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["ActorId"] = new SelectList(_context.Actor, "Id", "Id", actorMovie.ActorId);
-            ViewData["MovieId"] = new SelectList(_context.Movie, "Id", "Id", actorMovie.MovieId);
-            return View(actorMovie);
+
+            // Repopulate the select lists if model state is invalid
+            viewModel.Movies = await _context.Movie.Select(m => new SelectListItem
+            {
+                Value = m.Id.ToString(),
+                Text = m.Title
+            }).ToListAsync();
+
+            viewModel.Actors = await _context.Actor.Select(a => new SelectListItem
+            {
+                Value = a.Id.ToString(),
+                Text = a.Name
+            }).ToListAsync();
+
+            return View(viewModel);
         }
 
         // GET: ActorMovies/Delete/5

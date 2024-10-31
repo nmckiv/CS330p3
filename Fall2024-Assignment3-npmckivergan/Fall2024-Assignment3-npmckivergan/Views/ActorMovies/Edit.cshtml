@@ -1,4 +1,4 @@
-﻿@model Fall2024_Assignment3_npmckivergan.Models.ActorMovie
+﻿@model Fall2024_Assignment3_npmckivergan.Models.ActorMovieCreateViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -35,16 +35,19 @@
         <div class="col-md-4">
             <form asp-action="Edit">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                 <div class="form-group">
-                    <label asp-for="Movie" class="control-label"></label>
-                    <select asp-for="Movie" class="form-control" asp-items="ViewBag.Movie"></select>
-                    <span asp-validation-for="Movie" class="text-danger"></span>
+                    <label asp-for="MovieId" class="control-label"></label>
+                    <select asp-for="MovieId" class="form-control" asp-items="Model.Movies"></select>
+                    <span asp-validation-for="MovieId" class="text-danger"></span> <!-- Validation message -->
                 </div>
+
                 <div class="form-group">
-                    <label asp-for="Actor" class="control-label"></label>
-                    <select asp-for="Actor" class="form-control" asp-items="ViewBag.Actor"></select>
-                    <span asp-validation-for="Actor" class="text-danger"></span>
+                    <label asp-for="ActorId" class="control-label"></label>
+                    <select asp-for="ActorId" class="form-control" asp-items="Model.Actors"></select>
+                    <span asp-validation-for="ActorId" class="text-danger"></span> <!-- Validation message -->
                 </div>
+
                 <div class="form-group">
                     <input type="submit" value="Save" class="btn btn-primary" />
                 </div>
